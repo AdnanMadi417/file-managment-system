@@ -1,17 +1,26 @@
 <script setup lang="ts">
-import { defineProps, defineEmits } from "vue";
+import {defineEmits, defineProps} from "vue";
+
+interface File {
+  id: string;
+  fileName: string;
+  fileSize: string;
+  date: string;
+  urlLink: string;
+  button: boolean;
+}
 
 const fileDetails = [
-  { label: "File Name", key: "fileName" },
-  { label: "File Size", key: "fileSize" },
-  { label: "Date", key: "date" },
-  { label: "File URL", key: "urlLink" },
+  {id: '1', label: "File Name", key: "fileName"},
+  {id: '2', label: "File Size", key: "fileSize"},
+  {id: '3', label: "Date", key: "date"},
+  {id: '4', label: "File URL", key: "urlLink"},
 ];
 
-const props = defineProps({
-  visible: Boolean,
-  file: Object,
-});
+const props = defineProps<{
+  visible: boolean;
+  file: File | null;
+}>();
 
 const emit = defineEmits(["cancel"]);
 
@@ -32,8 +41,9 @@ const cancel = () => {
         </div>
         <div class="popup-body">
           <div v-for="(detail, index) in fileDetails" :key="index">
-            <h3>{{ detail.label }}:</h3>
-            <h3 v-if="detail.key !== 'urlLink'">{{ props.file?.[detail.key] || 'N/A' }}</h3>
+            <h3>{{detail.id}}. {{ detail.label }}</h3>
+            <h3 v-if="detail.key !== 'urlLink'">{{ props.file?.[detail.key as keyof File] || 'N/A' }}
+            </h3>
             <h3 v-else>
               <a :href="props.file?.[detail.key]" target="_blank" rel="noopener noreferrer">
                 View File
@@ -53,7 +63,7 @@ const cancel = () => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.15);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -70,12 +80,12 @@ const cancel = () => {
 
 .popup-content {
   width: 80%;
-  max-width: 450px;
+  max-width: 550px;
   background: white;
   border-radius: 8px;
   overflow: hidden;
   padding: 0;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.23);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .popup-header {
