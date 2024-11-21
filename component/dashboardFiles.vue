@@ -1,59 +1,76 @@
 <script setup lang="ts">
-import {ref} from "vue";
+import {onMounted, ref} from "vue";
 import {CListGroup, CListGroupItem} from "@coreui/vue/dist/esm/components/list-group";
-import 'bootstrap/dist/css/bootstrap.min.css';
+import "bootstrap/dist/css/bootstrap.min.css";
 import AddFilePopup from "~/component/AddFilePopup.vue";
 import DeleteFilePopup from "~/component/DeleteFilePopup.vue";
 import UpdateFilePopup from "~/component/UpdateFilePopup.vue";
 import ViewFilePopup from "~/component/ViewFilePopup.vue";
 
-const files = ref([
-  {
-    fileName: "Report 2024",
-    filesize: "1.2 MB",
-    date: "2024-11-20",
-    urlLink: "https://example.com/report2024",
-    button: "Extend",
-    color: "#EEEEEE",
-  },
-  {
-    fileName: "Invoice 3321",
-    filesize: "500 KB",
-    date: "2024-10-15",
-    urlLink: "https://example.com/invoice3321",
-    button: "Extend",
-    color: "#EEEEEE",
-  },
-  {
-    fileName: "Presentation Q4",
-    filesize: "3.5 MB",
-    date: "2024-11-01",
-    urlLink: "https://example.com/presentationQ4",
-    button: "Extend",
-    color: "#EEEEEE",
-  },
-]);
+let {$axios} = useNuxtApp();
+const api = $axios();
 
-const dropdownStates = ref(files.value.map(() => false));
+interface File {
+  id: string;
+  fileName: string;
+  fileSize: string;
+  date: string;
+  urlLink: string;
+  button: boolean;
+}
 
-const toggleDropdown = (index: number) => {
-  dropdownStates.value = dropdownStates.value.map((state, i) =>
-      i === index ? !state : false
-  );
+const files = ref<File[]>([]);
+
+const fetchFiles = async () => {
+  try {
+    const response = await api.get("https://671f40e7e7a5792f052d8a2f.mockapi.io/Files");
+    console.log(response.data);
+    files.value = response.data.map((file: any) => ({
+      ...file,
+      date: new Date(file.date).toLocaleDateString(),
+    }));
+    dropdownStates.value = files.value.map(() => false);
+  } catch (error) {
+    console.error("Error fetching files:", error);
+  }
 };
 
-const showDeleteConfirm = ref(false);
-const currentFileIndex = ref<number | null>(null);
+onMounted(fetchFiles);
+
+const dropdownStates = ref<boolean[]>([]);
+
 const showAddFileModal = ref(false);
+const showDeleteConfirm = ref(false);
 const showUpdateFileModal = ref(false);
-const fileToUpdate = ref<any>(null);
 const showViewFileModal = ref(false);
+
+const currentFileIndex = ref<number | null>(null);
+const fileToUpdate = ref<any>(null);
 const fileToView = ref<any>(null);
+
+const addFile = async (newFile: any) => {
+  try {
+    const response = await api.post('/files', newFile);
+    files.value.push(response.data);
+    showAddFileModal.value = false;
+  } catch (error) {
+    console.error('Error adding file:', error);
+  }
+};
+
+
+const openAddFileModal = () => {
+  showAddFileModal.value = true;
+};
+
+const cancelAddFile = () => {
+  showAddFileModal.value = false;
+};
 
 const handleAction = (action: string, index: number) => {
   const file = files.value[index];
-  if (action === 'Add File') {
-    showAddFileModal.value = true;
+  if (action === "Add File") {
+    openAddFileModal();
   } else if (action === "Delete File") {
     currentFileIndex.value = index;
     showDeleteConfirm.value = true;
@@ -63,56 +80,40 @@ const handleAction = (action: string, index: number) => {
   } else if (action === "View File") {
     fileToView.value = {...file};
     showViewFileModal.value = true;
-  } else {
-    console.log(`${action} selected for "${file.fileName}"`);
   }
 };
 
-const deleteFile = () => {
+const deleteFile = async () => {
   if (currentFileIndex.value !== null) {
-    files.value.splice(currentFileIndex.value, 1);
-    dropdownStates.value.splice(currentFileIndex.value, 1);
-    console.log("File deleted successfully.");
+    try {
+      const fileId = files.value[currentFileIndex.value].id;
+      await api.delete(`/files/${fileId}`);
+      files.value.splice(currentFileIndex.value, 1);
+      dropdownStates.value.splice(currentFileIndex.value, 1);
+      showDeleteConfirm.value = false;
+    } catch (error) {
+      console.error("Error deleting file:", error);
+    }
   }
-  showDeleteConfirm.value = false;
 };
 
 const cancelDelete = () => {
   showDeleteConfirm.value = false;
 };
 
-const addFile = (newFile: {
-  fileName: string;
-  filesize: string;
-  date: string;
-  urlLink: string;
-  button: string;
-  color: string;
-}) => {
-  files.value.push(newFile);
-  showAddFileModal.value = false;
-};
-
-const cancelAddFile = () => {
-  showAddFileModal.value = false;
-};
-
-const updateFile = (updatedFile: {
-  fileName: string;
-  filesize: string;
-  date: string;
-  urlLink: string;
-  button: string;
-  color: string;
-}) => {
+const updateFile = async (updatedFile: any) => {
   if (fileToUpdate.value) {
-    const index = files.value.findIndex(file => file === fileToUpdate.value);
+    const index = files.value.findIndex((file) => file.id === fileToUpdate.value.id);
     if (index !== -1) {
-      files.value[index] = {...updatedFile}; // Update the file in the array
-      console.log("File updated successfully.");
+      try {
+        const response = await api.put(`/files/${fileToUpdate.value.id}`, updatedFile);
+        files.value[index] = {...response.data};
+        showUpdateFileModal.value = false;
+      } catch (error) {
+        console.error("Error updating file:", error);
+      }
     }
   }
-  showUpdateFileModal.value = false;
 };
 
 const cancelUpdateFile = () => {
@@ -130,37 +131,38 @@ const cancelViewFile = () => {
       <CListGroup>
         <CListGroupItem>
           <div class="header-colum-container">
-            <div class="icon">
-              <span><UIcon name="mdi-file"/></span>
+            <div class="file-name">
+              <span class="icon"><UIcon name="mdi-file"/></span>
+              <span class="label"> File Name</span>
             </div>
-            <div class="file-name">File Name</div>
             <div>File Size</div>
             <div>Link</div>
             <div>Date</div>
-            <button>button</button>
+            <div class="dropdown-container">
+              <button class="extend">button</button>
+            </div>
           </div>
           <div
               class="colum-container"
               v-for="(file, index) in files"
-              :key="index"
-              :style="{ backgroundColor: file.color }"
+              :key="file.id"
           >
-            <div>
+            <div class="file-name">
               <span class="icon"><UIcon name="mdi-file"/></span>
+              <span class="label">{{ file.fileName }}</span>
             </div>
-            <div class="file-name">{{ file.fileName }}</div>
-            <div><a :href="file.urlLink">File</a></div>
-            <div>{{ file.filesize }}</div>
+            <div>{{ file.fileSize }} GB</div>
+            <div><a :href="file.urlLink" target="_blank">File</a></div>
             <div>{{ file.date }}</div>
-
-            <button @click="toggleDropdown(index)" class="extend-btn">{{ file.button }}</button>
-
-            <ul v-show="dropdownStates[index]" class="dropdown-list">
-              <li @click="handleAction('Add File', index)">Add File</li>
-              <li @click="handleAction('Delete File', index)">Delete File</li>
-              <li @click="handleAction('Update File', index)">Update File</li>
-              <li @click="handleAction('View File', index)">View File</li>
-            </ul>
+            <div class="dropdown-container">
+              <button class="extend-btn">Extend</button>
+              <ul class="dropdown-list">
+                <li @click="handleAction('Add File',index)">Add File</li>
+                <li @click="handleAction('Delete File' ,index)">Delete File</li>
+                <li @click="handleAction('Update File' ,index)">Update File</li>
+                <li @click="handleAction('View File',index )">View File</li>
+              </ul>
+            </div>
           </div>
         </CListGroupItem>
       </CListGroup>
@@ -192,6 +194,7 @@ const cancelViewFile = () => {
     />
   </div>
 </template>
+
 
 <style scoped>
 
@@ -227,20 +230,19 @@ const cancelViewFile = () => {
   margin: 0 1rem;
 }
 
-.icon {
-  flex: 5%;
-  color: var(--main-color);
-}
-
 .header-colum-container .file-name,
 .colum-container .file-name {
   flex: 20%;
 }
 
-
 .header-colum-container .icon {
-  flex: 5%;
+  margin-right: 1rem;
   color: var(--font-color);
+}
+
+.colum-container .icon {
+  margin-right: 1rem;
+  color: var(--main-color);
 }
 
 
@@ -252,7 +254,16 @@ const cancelViewFile = () => {
 div > a {
   text-decoration: none;
   cursor: pointer;
-  color: var(--font-color);
+  color: var(--main-color);
+}
+
+.extend {
+  padding: .2rem;
+  background-color: transparent;
+  border: none;
+  border-radius: .5rem 0;
+  cursor: pointer;
+  outline: none;
 }
 
 .extend-btn {
@@ -271,29 +282,55 @@ div > a {
   transition: .4s ease-in-out;
 }
 
+.dropdown-container {
+  position: relative;
+  display: inline-block;
+}
+
+.extend-btn {
+  padding: 0.5rem 1rem;
+  background-color: var(--main-color);
+  color: var(--font-hovor-color);
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  outline: none;
+  transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+}
+
+.extend-btn:hover {
+  background-color: var(--font-hovor-color);
+  color: var(--main-color);
+}
+
+.dropdown-container:hover .dropdown-list {
+  display: block;
+}
+
 .dropdown-list {
   position: absolute;
-  top: 100%;
+  top: 99%;
   left: 0;
-  margin-top: 1rem;
+  display: none;
+  margin-top: .2rem;
   background-color: #fff;
-  border-radius: .5rem;
+  border-radius: 0.5rem;
   list-style: none;
   padding: 0;
   width: 10rem;
   z-index: 1000;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
 }
 
 .dropdown-list li {
-  padding: .5rem 1rem;
+  padding: 0.5rem 1rem;
   cursor: pointer;
   font-size: 1rem;
   background-color: transparent;
+  transition: background-color 0.3s ease-in-out;
 }
 
 .dropdown-list li:hover {
-  background-color: #f1f1f1;
-  transition: .3s ease-in-out;
+  background-color: var(--font-hovor-color);
 }
 </style>
