@@ -1,5 +1,13 @@
 <script setup lang="ts">
-import {defineEmits, defineProps, ref} from "vue";
+import {defineEmits, defineProps, ref, watch} from "vue";
+
+interface File {
+  id: string;
+  fileName: string;
+  fileSize: string;
+  date: string;
+  urlLink: string;
+}
 
 const fileDetails = [
   {label: "File Name", key: "fileName"},
@@ -8,14 +16,23 @@ const fileDetails = [
   {label: "File URL", key: "urlLink"},
 ];
 
-const props = defineProps({
-  visible: Boolean,
-  file: Object,
-});
+const props = defineProps<{
+  visible: boolean;
+  file: File | null;
+}>();
 
 const emit = defineEmits(["updateFile", "cancel"]);
 
-const updatedFile = ref({...props.file});
+const updatedFile = ref<File | null>(null);
+
+watch(
+    () => props.file,
+    (newFile) => {
+      updatedFile.value = newFile ? { ...newFile } : null;
+    },
+    { immediate: true }
+);
+
 
 const cancel = () => {
   console.log("Popup closed");
@@ -23,7 +40,9 @@ const cancel = () => {
 };
 
 const handleUpdateFile = () => {
-  emit("updateFile", updatedFile.value);
+  if (updatedFile.value) {
+    emit("updateFile", updatedFile.value);
+  }
 };
 
 const cancelUpdateFile = () => {
@@ -42,19 +61,24 @@ const cancelUpdateFile = () => {
         <div class="popup-body">
           <div v-for="(detail, index) in fileDetails" :key="index">
             <h3>{{ detail.label }}:</h3>
-            <div v-if="detail.key !== 'urlLink'">
-              <input v-model="updatedFile[detail.key]" :placeholder="props.file?.[detail.key] || 'N/A'"/>
-            </div>
-            <div v-else>
-              <input v-model="updatedFile[detail.key]" type="text"
-                     :placeholder="props.file?.[detail.key] || 'Enter URL'"/>
-              <a v-if="updatedFile[detail.key]" :href="updatedFile[detail.key]" target="_blank"
-                 rel="noopener noreferrer">
+            <div>
+              <input
+                  v-model="updatedFile?.[detail.key]"
+                  :type="detail.key === 'urlLink' ? 'url' : 'text'"
+                  class="form-control"
+              />
+              <a
+                  v-if="detail.key === 'urlLink' && updatedFile?.[detail.key]"
+                  :href="updatedFile[detail.key]"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="link-preview"
+              >
+                Open Link
               </a>
             </div>
           </div>
-        </div>
-        <div class="popup-footer">
+        </div>        <div class="popup-footer">
           <button @click="handleUpdateFile" class="update-btn">Update</button>
           <button @click="cancelUpdateFile" class="cancel-btn">Cancel</button>
         </div>
