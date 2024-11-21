@@ -74,8 +74,8 @@ const cancel = () => {
   background: white;
   border-radius: 8px;
   overflow: hidden;
-  padding: 1rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 0;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.23);
 }
 
 .popup-header {
@@ -109,7 +109,7 @@ const cancel = () => {
   color: #495057;
 }
 
-.popup-body div{
+.popup-body div {
   display: flex;
   flex-direction: row;
   align-items: start;
@@ -117,15 +117,53 @@ const cancel = () => {
   margin: 0 auto;
 }
 
-div > h3{
+div > h3 {
   flex: 30%;
   font-size: 1.1rem;
   text-align: start;
-  padding: .5rem;
+  padding: 0.5rem;
   background-color: var(--font-color);
-  color:var(--main-color);
+  color: var(--main-color);
 }
 
+@media (max-width: 768px) {
+  .popup-content {
+    width: 95%;
+  }
 
+  .popup-header {
+    display: flex;
+    margin: 1rem;
+  }
 
+  .popup-title {
+    font-size: 1.2rem;
+  }
+
+  .popup-body div {
+    flex-direction: row;
+    width: 100%;
+  }
+
+  div > h3 {
+    flex: 100%;
+    font-size: 1rem;
+    padding: 0.5rem;
+    text-align: start;
+  }
+}
+
+@media (max-width: 480px) {
+  .popup-title {
+    font-size: 1rem;
+  }
+
+  .btn-close {
+    font-size: 1.2rem;
+  }
+
+  .popup-body {
+    padding: 0.8rem;
+  }
+}
 </style>
