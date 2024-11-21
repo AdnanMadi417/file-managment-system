@@ -1,13 +1,10 @@
 <script setup lang="ts">
-import {onMounted, ref} from "vue";
-import {CListGroup, CListGroupItem} from "@coreui/vue/dist/esm/components/list-group";
+import { onMounted, ref } from "vue";
+import { CListGroup, CListGroupItem } from "@coreui/vue/dist/esm/components/list-group";
 import "bootstrap/dist/css/bootstrap.min.css";
-import AddFilePopup from "~/component/AddFilePopup.vue";
-import DeleteFilePopup from "~/component/DeleteFilePopup.vue";
-import UpdateFilePopup from "~/component/UpdateFilePopup.vue";
 import ViewFilePopup from "~/component/ViewFilePopup.vue";
 
-let {$axios} = useNuxtApp();
+let { $axios } = useNuxtApp();
 const api = $axios();
 
 interface File {
@@ -24,105 +21,47 @@ const files = ref<File[]>([]);
 const fetchFiles = async () => {
   try {
     const response = await api.get("https://671f40e7e7a5792f052d8a2f.mockapi.io/Files");
-    console.log(response.data);
     files.value = response.data.map((file: any) => ({
       ...file,
       date: new Date(file.date).toLocaleDateString(),
     }));
-    dropdownStates.value = files.value.map(() => false);
   } catch (error) {
     console.error("Error fetching files:", error);
   }
 };
+const selectedFile = ref<File | null>(null);
+const isPopupVisible = ref(false);
+
+const handleAction = (action: string, fileId: string) => {
+  if (action === "Delete") {
+    deleteFile(fileId);
+  } else if (action === "View") {
+    const file = files.value.find(f => f.id === fileId);
+    if (file) {
+      selectedFile.value = file;
+      isPopupVisible.value = true; // Show popup on View action
+    }
+  } else if (action === "Update") {
+    console.log(`Update file with ID: ${fileId}`);
+  }
+};
+
+const deleteFile = async (fileId: string) => {
+  try {
+    await api.delete(`https://671f40e7e7a5792f052d8a2f.mockapi.io/Files/${fileId}`);
+    files.value = files.value.filter(file => file.id !== fileId);
+    console.log(`File with ID ${fileId} deleted successfully.`);
+  } catch (error) {
+    console.error("Error deleting file:", error);
+  }
+};
+
+const closePopup = () => {
+  isPopupVisible.value = false; // Close the popup
+  selectedFile.value = null; // Clear the selected file
+};
 
 onMounted(fetchFiles);
-
-const dropdownStates = ref<boolean[]>([]);
-
-const showAddFileModal = ref(false);
-const showDeleteConfirm = ref(false);
-const showUpdateFileModal = ref(false);
-const showViewFileModal = ref(false);
-
-const currentFileIndex = ref<number | null>(null);
-const fileToUpdate = ref<any>(null);
-const fileToView = ref<any>(null);
-
-const addFile = async (newFile: any) => {
-  try {
-    const response = await api.post('/files', newFile);
-    files.value.push(response.data);
-    showAddFileModal.value = false;
-  } catch (error) {
-    console.error('Error adding file:', error);
-  }
-};
-
-
-const openAddFileModal = () => {
-  showAddFileModal.value = true;
-};
-
-const cancelAddFile = () => {
-  showAddFileModal.value = false;
-};
-
-const handleAction = (action: string, index: number) => {
-  const file = files.value[index];
-  if (action === "Add File") {
-    openAddFileModal();
-  } else if (action === "Delete File") {
-    currentFileIndex.value = index;
-    showDeleteConfirm.value = true;
-  } else if (action === "Update File") {
-    fileToUpdate.value = {...file};
-    showUpdateFileModal.value = true;
-  } else if (action === "View File") {
-    fileToView.value = {...file};
-    showViewFileModal.value = true;
-  }
-};
-
-const deleteFile = async () => {
-  if (currentFileIndex.value !== null) {
-    try {
-      const fileId = files.value[currentFileIndex.value].id;
-      await api.delete(`/files/${fileId}`);
-      files.value.splice(currentFileIndex.value, 1);
-      dropdownStates.value.splice(currentFileIndex.value, 1);
-      showDeleteConfirm.value = false;
-    } catch (error) {
-      console.error("Error deleting file:", error);
-    }
-  }
-};
-
-const cancelDelete = () => {
-  showDeleteConfirm.value = false;
-};
-
-const updateFile = async (updatedFile: any) => {
-  if (fileToUpdate.value) {
-    const index = files.value.findIndex((file) => file.id === fileToUpdate.value.id);
-    if (index !== -1) {
-      try {
-        const response = await api.put(`/files/${fileToUpdate.value.id}`, updatedFile);
-        files.value[index] = {...response.data};
-        showUpdateFileModal.value = false;
-      } catch (error) {
-        console.error("Error updating file:", error);
-      }
-    }
-  }
-};
-
-const cancelUpdateFile = () => {
-  showUpdateFileModal.value = false;
-};
-
-const cancelViewFile = () => {
-  showViewFileModal.value = false;
-};
 </script>
 
 <template>
@@ -132,68 +71,45 @@ const cancelViewFile = () => {
         <CListGroupItem>
           <div class="header-colum-container">
             <div class="file-name">
-              <span class="icon"><UIcon name="mdi-file"/></span>
+              <span class="icon"><UIcon name="mdi-file" /></span>
               <span class="label"> File Name</span>
             </div>
             <div>File Size</div>
             <div>Link</div>
             <div>Date</div>
-            <div class="dropdown-container">
-              <button class="extend">button</button>
-            </div>
+            <div>Action</div>
           </div>
           <div
               class="colum-container"
-              v-for="(file, index) in files"
+              v-for="file in files"
               :key="file.id"
           >
             <div class="file-name">
-              <span class="icon"><UIcon name="mdi-file"/></span>
+              <span class="icon"><UIcon name="mdi-file" /></span>
               <span class="label">{{ file.fileName }}</span>
             </div>
             <div>{{ file.fileSize }} GB</div>
             <div><a :href="file.urlLink" target="_blank">File</a></div>
             <div>{{ file.date }}</div>
-            <div class="dropdown-container">
-              <button class="extend-btn">Extend</button>
-              <ul class="dropdown-list">
-                <li @click="handleAction('Add File',index)">Add File</li>
-                <li @click="handleAction('Delete File' ,index)">Delete File</li>
-                <li @click="handleAction('Update File' ,index)">Update File</li>
-                <li @click="handleAction('View File',index )">View File</li>
-              </ul>
+            <div class="action-container">
+              <div class="dropdown-container">
+                <button class="extend-btn">Extend</button>
+                <ul class="dropdown-list">
+                  <li @click="handleAction('Delete', file.id)">Delete</li>
+                  <li @click="handleAction('View', file.id)">View</li>
+                  <li @click="handleAction('Update', file.id)">Update</li>
+                </ul>
+              </div>
             </div>
+            <ViewFilePopup :visible="isPopupVisible" :file="selectedFile" @cancel="closePopup" />
           </div>
         </CListGroupItem>
       </CListGroup>
     </div>
-
-    <DeleteFilePopup
-        :visible="showDeleteConfirm"
-        @confirm="deleteFile"
-        @cancel="cancelDelete"
-    />
-
-    <AddFilePopup
-        :visible="showAddFileModal"
-        @addFile="addFile"
-        @cancel="cancelAddFile"
-    />
-
-    <UpdateFilePopup
-        :visible="showUpdateFileModal"
-        :file="fileToUpdate"
-        @updateFile="updateFile"
-        @cancel="cancelUpdateFile"
-    />
-
-    <ViewFilePopup
-        :visible="showViewFileModal"
-        :file="fileToView"
-        @cancel="cancelViewFile"
-    />
   </div>
+
 </template>
+
 
 
 <style scoped>
@@ -296,38 +212,44 @@ div > a {
   color: var(--main-color);
 }
 
+
 .dropdown-container {
   position: relative;
-  display: inline-block;
+}
+
+.dropdown-list {
+  display: none;
+  position: absolute;
+  top: calc(100% + 5px);
+  left: 0;
+  background-color: #fff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  list-style: none;
+  margin: 0;
+  padding: .5rem 1rem;
+  border-radius: 5px;
+  z-index: 1000;
+  min-width: 120px;
 }
 
 .dropdown-container:hover .dropdown-list {
   display: block;
+  margin: -.5rem 1rem 0 1rem;
 }
 
-.dropdown-list {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  display: none;
-  margin-top: 0.2rem;
-  background-color: #fff;
-  border-radius: 0.5rem;
-  list-style: none;
-  padding: 0;
-  width: 10rem;
-  z-index: 1000;
-}
 
 .dropdown-list li {
-  padding: 0.5rem 1rem;
+  padding: 10px;
   cursor: pointer;
-  font-size: 1rem;
-  background-color: transparent;
-  transition: background-color 0.3s ease-in-out;
+  border-bottom: 1px solid #ddd;
+}
+
+.dropdown-list li:last-child {
+  border-bottom: none;
 }
 
 .dropdown-list li:hover {
-  background-color: var(--font-hovor-color);
+  background-color: #f0f0f0;
 }
+
 </style>
