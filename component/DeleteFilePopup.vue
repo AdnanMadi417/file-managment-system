@@ -4,14 +4,14 @@
       <div class="popup-content">
         <div class="popup-header">
           <h5 class="popup-title">Confirm Deletion</h5>
-          <button type="button" class="btn-close" @click="cancel" aria-label="Close"></button>
+          <button type="button" class="btn-close" @click="cancel"></button>
         </div>
         <div class="popup-body">
           <p>Are you sure you want to delete this file?</p>
         </div>
         <div class="popup-footer">
-          <button type="button" class="btn btn-secondary" @click="cancel">Cancel</button>
-          <button type="button" class="btn btn-danger" @click="confirm">Delete</button>
+          <button type="button" class="btn-cancel" @click="cancel">Cancel</button>
+          <button type="button" class="btn-confirm" @click="confirm">Delete</button>
         </div>
       </div>
     </div>
@@ -67,6 +67,7 @@ const cancel = () => {
   background: white;
   border-radius: 8px;
   overflow: hidden;
+  padding: 1rem;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
@@ -79,14 +80,20 @@ const cancel = () => {
 
 .popup-title {
   margin: 0;
-  font-size: 1.25rem;
+  font-size: 1.4rem;
+  color: var(--main-color);
 }
 
 .btn-close {
-  background: none;
   border: none;
   font-size: 1.5rem;
   cursor: pointer;
+  background-color: transparent;
+  color: var(--main-color);
+}
+
+.btn-close:hover {
+  color: red;
 }
 
 .popup-body {
@@ -97,9 +104,35 @@ const cancel = () => {
 
 .popup-footer {
   padding: 1rem;
-  border-top: 3px solid #e9ecef;
+  border-top: 3px solid var(--main-color);
   display: flex;
   justify-content: flex-end;
   gap: 0.5rem;
 }
+
+.popup-footer button {
+  border: none;
+  font-size: 1.2rem;
+  margin: 0 1rem;
+  color: var(--font-color);
+  padding: .2rem .5rem;
+  border-radius: 0.2rem;
+}
+
+.popup-footer .btn-cancel,
+.popup-footer .btn-confirm {
+  background-color: var(--button-color);
+  color: var(--font-color);
+}
+
+.popup-footer .btn-confirm:hover {
+  background-color: var(--button-color);
+  transition: .3s ease-in-out;
+}
+
+.popup-footer .btn-confirm:hover {
+  background-color: rgba(255, 0, 0, 0.9);
+  transition: .3s ease-in-out;
+}
+
 </style>
