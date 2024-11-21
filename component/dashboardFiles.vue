@@ -197,7 +197,6 @@ const cancelViewFile = () => {
 
 
 <style scoped>
-
 .dashboard-sec {
   display: flex;
   background-color: #dddddd;
@@ -207,7 +206,7 @@ const cancelViewFile = () => {
 .container {
   width: 80%;
   margin: 7rem auto;
-  font-size: 1.2rem;
+  font-size: 1.2rem !important;
 }
 
 .colum-container,
@@ -216,35 +215,59 @@ const cancelViewFile = () => {
   flex-direction: row;
   flex-wrap: wrap;
   align-items: center;
-  padding: .5rem;
-  margin-bottom: .5rem;
-  border-radius: .2rem;
-  background: #ffffff;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 0.5rem;
+  margin-bottom: 0.5rem;
+  border-radius: 0.2rem;
+  background-color: var(--font-hovor-color);
 }
 
 .colum-container div,
 .header-colum-container div {
-  flex: 10%;
+  flex: 1 1 10%;
   text-align: start;
   margin: 0 1rem;
 }
 
 .header-colum-container .file-name,
 .colum-container .file-name {
-  flex: 20%;
+  flex: 2 1 20%;
 }
 
-.header-colum-container .icon {
+@media (max-width: 1200px) {
+  .container {
+    width: 90%;
+  }
+
+  .colum-container,
+  .header-colum-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .colum-container div,
+  .header-colum-container div {
+    flex: 1 1 100%;
+    margin: 0.5rem 0;
+  }
+
+  .header-colum-container .file-name,
+  .colum-container .file-name {
+    flex: 1 1 100%;
+  }
+}
+
+.header-colum-container .file-name .icon,
+.colum-container .file-name .icon{
   margin-right: 1rem;
-  color: var(--font-color);
 }
 
-.colum-container .icon {
-  margin-right: 1rem;
-  color: var(--main-color);
+@media (max-width: 768px) {
+  .colum-container div,
+  .header-colum-container div {
+    margin: 0.5rem 0;
+    font-size: 1rem;
+  }
 }
-
 
 .header-colum-container {
   background-color: var(--main-hovor-color);
@@ -255,36 +278,6 @@ div > a {
   text-decoration: none;
   cursor: pointer;
   color: var(--main-color);
-}
-
-.extend {
-  padding: .2rem;
-  background-color: transparent;
-  border: none;
-  border-radius: .5rem 0;
-  cursor: pointer;
-  outline: none;
-}
-
-.extend-btn {
-  padding: .2rem;
-  background-color: var(--main-color);
-  color: var(--font-hovor-color);
-  border: none;
-  border-radius: .5rem 0;
-  cursor: pointer;
-  outline: none;
-}
-
-.extend-btn:hover {
-  background-color: var(--font-hovor-color);
-  color: var(--main-color);
-  transition: .4s ease-in-out;
-}
-
-.dropdown-container {
-  position: relative;
-  display: inline-block;
 }
 
 .extend-btn {
@@ -303,23 +296,27 @@ div > a {
   color: var(--main-color);
 }
 
+.dropdown-container {
+  position: relative;
+  display: inline-block;
+}
+
 .dropdown-container:hover .dropdown-list {
   display: block;
 }
 
 .dropdown-list {
   position: absolute;
-  top: 99%;
+  top: 100%;
   left: 0;
   display: none;
-  margin-top: .2rem;
+  margin-top: 0.2rem;
   background-color: #fff;
   border-radius: 0.5rem;
   list-style: none;
   padding: 0;
   width: 10rem;
   z-index: 1000;
-
 }
 
 .dropdown-list li {
