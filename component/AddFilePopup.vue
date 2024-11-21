@@ -102,12 +102,13 @@ const cancel = () => {
               />
             </div>
             <div>
-              <button type="submit" class="btn-submit">Add File</button>
-              <button type="submit" class="btn-cancel" @click="cancel">Cancel</button>
             </div>
           </form>
         </div>
-        <div class="popup-footer"></div>
+        <div class="popup-footer">
+          <button type="submit" class="btn-submit">Add File</button>
+          <button type="submit" class="btn-cancel" @click="cancel">Cancel</button>
+        </div>
       </div>
     </div>
   </div>
@@ -192,26 +193,75 @@ const cancel = () => {
 }
 
 .popup-footer {
+  width: calc(100% - 70px);
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
   padding: 1rem;
   border-top: 3px solid #e9ecef;
-  display: flex;
-  justify-content: flex-end;
   gap: 0.5rem;
+}
+
+.popup-footer button{
+  background-color: var(--main-color);
+  color: var(--font-hovor-color);
+  cursor: pointer;
+  border-radius: .5rem;
+  min-width: 90px ;
 }
 
 .btn-submit {
   background-color: var(--main-color);
   padding: .5rem;
-  margin: 0 1.5rem;
   font-size: 1rem !important;
-  color: white;
-  cursor: pointer;
-  border-radius: .5rem;
 }
 
 .btn-submit:hover {
   background-color: var(--button-color);
   transition: .3s ease-in-out;
+}
+
+.btn-cancel:hover {
+  background-color: red;
+  color: var(--font-hovor-color);
+  transition: .3s ease-in-out;
+}
+
+@media (max-width: 768px) {
+  .popup-content {
+    width: 95%;
+  }
+
+  .popup-header {
+    display: flex;
+    margin: 1rem;
+  }
+
+  .popup-title {
+    font-size: 1.2rem;
+  }
+
+  .popup-body div {
+    flex-direction: row;
+    width: 100%;
+  }
+
+  div > h3 {
+    flex: 100%;
+    font-size: 1rem;
+    padding: 0.5rem;
+    text-align: start;
+  }
+}
+
+@media (max-width: 480px) {
+  .popup-title {
+    font-size: 1rem;
+  }
+
+  .popup-body {
+    padding: 0.8rem;
+  }
 }
 
 </style>
