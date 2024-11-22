@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
-import { CListGroup, CListGroupItem } from "@coreui/vue/dist/esm/components/list-group";
+import {onMounted, ref} from "vue";
+import {CListGroup, CListGroupItem} from "@coreui/vue/dist/esm/components/list-group";
 import "bootstrap/dist/css/bootstrap.min.css";
 import ViewFilePopup from "~/component/ViewFilePopup.vue";
 import UpdateFilePopup from "~/component/UpdateFilePopup.vue";
+import AddFilePopup from "~/component/AddFilePopup.vue";
 
-let { $axios } = useNuxtApp();
+let {$axios} = useNuxtApp();
 const api = $axios();
 
 interface File {
@@ -21,6 +22,7 @@ const files = ref<File[]>([]);
 const selectedFile = ref<File | null>(null);
 const isViewFilePopupVisible = ref(false);
 const isUpdateFilePopupVisible = ref(false);
+const isAddFilePopupVisible = ref(false);
 
 const fetchFiles = async () => {
   try {
@@ -34,21 +36,31 @@ const fetchFiles = async () => {
   }
 };
 
+const showAddFilePopup = () => {
+  isAddFilePopupVisible.value = true;
+};
+
+const handleAddFile = (newFile: File) => {
+  files.value.push({
+    ...newFile,
+    id: Date.now().toString(),
+  });
+  isAddFilePopupVisible.value = false;
+};
+
 const handleAction = (action: string, fileId: string) => {
   if (action === "Delete") {
     deleteFile(fileId);
-  }
-  else if (action === "View") {
+  } else if (action === "View") {
     const file = files.value.find(f => f.id === fileId);
     if (file) {
       selectedFile.value = file;
       isViewFilePopupVisible.value = true;
     }
-  }
-  else if (action === "Update") {
+  } else if (action === "Update") {
     const file = files.value.find(f => f.id === fileId);
     if (file) {
-      selectedFile.value = { ...file };
+      selectedFile.value = {...file};
       isUpdateFilePopupVisible.value = true;
 
     }
@@ -81,6 +93,7 @@ const handleUpdateFile = (updatedFile: File) => {
 const closePopup = () => {
   isViewFilePopupVisible.value = false;
   isUpdateFilePopupVisible.value = false;
+  isAddFilePopupVisible.value = false;
   selectedFile.value = null;
 };
 
@@ -101,7 +114,8 @@ onMounted(fetchFiles);
             <div>File Size</div>
             <div>Link</div>
             <div>Date</div>
-            <div>Action</div>
+            <div>
+              <button @click="showAddFilePopup">Add File</button></div>
           </div>
           <div
               class="colum-container"
@@ -130,8 +144,10 @@ onMounted(fetchFiles);
       </CListGroup>
     </div>
   </div>
+  <AddFilePopup :visible="isAddFilePopupVisible" @addFile="handleAddFile" @cancel="closePopup"/>
   <ViewFilePopup :visible="isViewFilePopupVisible" :file="selectedFile" @cancel="closePopup"/>
-  <UpdateFilePopup :visible="isUpdateFilePopupVisible" :file="selectedFile" @updateFile="handleUpdateFile" @cancel="closePopup"/>
+  <UpdateFilePopup :visible="isUpdateFilePopupVisible" :file="selectedFile" @updateFile="handleUpdateFile"
+                   @cancel="closePopup"/>
 </template>
 
 

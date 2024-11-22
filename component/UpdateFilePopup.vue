@@ -40,10 +40,6 @@ const cancel = () => {
   emit("cancel");
 };
 
-const cancelUpdateFile = () => {
-  emit("cancel");
-};
-
 const fileDetails = [
   {label: "File Name", key: "fileName"},
   {label: "File Size", key: "fileSize"},
@@ -59,9 +55,10 @@ const fileDetails = [
     <div class="container" @click.self="cancel">
       <div class="popup-content">
         <div class="popup-header">
-          <h5 class="popup-title">View File</h5>
+          <h5 class="popup-title">Update File</h5>
           <button type="button" class="btn-close" @click="cancel"></button>
         </div>
+        <hr class="divider">
         <div class="popup-body">
           <div class="file-detail" v-for="(detail, index) in fileDetails" :key="index">
             <label class="file-label">
@@ -83,7 +80,7 @@ const fileDetails = [
         </div>
         <div class="popup-footer">
           <button @click="handleUpdateFile" class="update-btn">Update</button>
-          <button @click="cancelUpdateFile" class="cancel-btn">Cancel</button>
+          <button @click="cancel" class="cancel-btn">Cancel</button>
         </div>
       </div>
     </div>
@@ -144,6 +141,10 @@ const fileDetails = [
   color: var(--main-color);
 }
 
+.divider{
+  border:1px solid var(--main-hovor-color) ;
+}
+
 .popup-body {
   padding: 1rem;
   font-size: 1rem;
@@ -156,7 +157,7 @@ const fileDetails = [
   align-items: center;
   text-align: start;
   width: 90%;
-  margin: 0 auto 1rem auto;
+  margin: 0 auto .5rem auto;
   background-color: var(--font-hovor-color);
 }
 
@@ -165,11 +166,11 @@ const fileDetails = [
   font-size: 1rem;
   text-align: start;
   color: var(--main-color);
-  padding: .5rem;
+  padding: .2rem;
 }
 
-.popup-body div .file-detail label{
-  flex: 1 1 25%;
+.popup-body div .file-detail{
+  min-width: 200px;
   padding: .2rem;
 }
 
@@ -198,7 +199,7 @@ const fileDetails = [
   padding: 0.3rem;
   outline: none;
   border-radius: .2rem;
-  background-color: var(--main-color);
+  background-color: var(--main-hovor-color);
   color: var(--font-color);
 }
 

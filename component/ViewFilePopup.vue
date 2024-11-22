@@ -31,7 +31,6 @@ const cancel = () => {
 </script>
 
 <template>
-
   <div class="popup-section" v-if="visible">
     <div class="container" @click.self="cancel">
       <div class="popup-content">
@@ -39,6 +38,7 @@ const cancel = () => {
           <h5 class="popup-title">View File</h5>
           <button type="button" class="btn-close" @click="cancel"></button>
         </div>
+        <hr class="divider">
         <div class="popup-body">
           <div v-for="(detail, index) in fileDetails" :key="index">
             <h3>{{detail.id}}. {{ detail.label }}</h3>
@@ -134,6 +134,10 @@ div > h3 {
   padding: 0.5rem;
   background-color: var(--font-color);
   color: var(--main-color);
+}
+
+.divider{
+  border:1px solid var(--main-hovor-color) ;
 }
 
 @media (max-width: 768px) {
