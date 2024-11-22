@@ -40,7 +40,7 @@ const showAddFilePopup = () => {
 const handleAddFile = (newFile: File) => {
   files.value.push({
     ...newFile,
-    id: Date.now().toString(), // Generate unique ID for demonstration
+    id: Date.now().toString(),
   });
   isAddFilePopupVisible.value = false;
 };
