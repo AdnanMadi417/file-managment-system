@@ -13,13 +13,9 @@
     "@coreui/coreui": "^5.2.0",
     "@coreui/vue": "^5.4.1",
     "@nuxt/ui": "^2.19.2",
+    "@vue/compiler-sfc": "^3.5.13",
     "axios": "^1.7.7",
     "bootstrap": "^5.3.3",
-    "nuxt": "^3.14.1592",
-    "vue": "latest",
-    "vue-router": "latest"
-  },
-  "devDependencies": {
-    "@vue/cli-service": "^3.3.1"
+    "nuxt": "^3.14.1592"
   }
 }
