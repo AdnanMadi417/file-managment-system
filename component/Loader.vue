@@ -1,8 +1,8 @@
 
 <template>
-  <div class="d-flex justify-content-center align-items-center" v-if="isLoading">
-    <div class="spinner-border text-dark" role="status">
-      <span class="visually-hidden">Loading...</span>
+  <div class="loader-sec" v-if="isLoading">
+    <div class="spinner-border container" role="status">
+      <span class="visually-hidden">Loading</span>
     </div>
   </div>
 </template>
@@ -14,10 +14,18 @@ const props = defineProps({
     required: true,
   }
 });
+
 </script>
 
 <style scoped>
+.loader-sec {
+  display: flex;
+  justify-content:center;
+  align-items: center;
+
+}
 .spinner-border {
+  color: var(--main-hovor-color);
   width: 3rem;
   height: 3rem;
 }
