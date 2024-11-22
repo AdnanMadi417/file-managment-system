@@ -1,0 +1,31 @@
+name: Deploy Website to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main  # This will trigger the deployment when you push to the 'main' branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'  # Replace with your required Node.js version
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build the project
+        run: npm run build  # Replace with your project’s build command
+
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: gh-pages  # The branch to deploy to, e.g., 'gh-pages' or 'main'
+          folder: dist       # The folder containing your build output (e.g., '.output' for Nuxt)
