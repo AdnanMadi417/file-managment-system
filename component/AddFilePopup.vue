@@ -6,33 +6,13 @@ type FormData = {
   fileSize: string;
   fileDate: string;
   fileLink: string;
-}
+};
 
 const questions = [
-  {
-    label: "File Name",
-    type: 'text',
-    placeholder: "Enter file name",
-    required: true,
-  },
-  {
-    label: "File Size",
-    type: 'text',
-    placeholder: "Enter file size",
-    required: true,
-  },
-  {
-    label: "Date",
-    type: 'date',
-    placeholder: "Enter file date",
-    required: true,
-  },
-  {
-    label: "File URL",
-    type: 'text',
-    placeholder: "Enter file url",
-    required: true,
-  }
+  { label: "File Name", type: 'text', placeholder: "Enter file name", required: true },
+  { label: "File Size", type: 'text', placeholder: "Enter file size", required: true },
+  { label: "Date", type: 'date', placeholder: "Enter file date", required: true },
+  { label: "File URL", type: 'text', placeholder: "Enter file url", required: true },
 ];
 
 defineProps({
@@ -41,7 +21,6 @@ defineProps({
 
 const emit = defineEmits(['addFile', 'cancel']);
 
-// Strongly typed form data object
 const formData = ref<FormData>({
   fileName: '',
   fileSize: '',
@@ -49,7 +28,22 @@ const formData = ref<FormData>({
   fileLink: '',
 });
 
-// Submit form
+// Map labels to FormData keys
+const mapLabelToKey = (label: string): keyof FormData => {
+  switch (label) {
+    case "File Name":
+      return "fileName";
+    case "File Size":
+      return "fileSize";
+    case "Date":
+      return "fileDate";
+    case "File URL":
+      return "fileLink";
+    default:
+      throw new Error(`Unknown label: ${label}`);
+  }
+};
+
 const submitForm = () => {
   const { fileName, fileSize, fileDate, fileLink } = formData.value;
 
@@ -59,24 +53,18 @@ const submitForm = () => {
       fileSize,
       date: fileDate,
       urlLink: fileLink || '',
-      button: 'Extend',
-      color: '#EEEEEE',
     });
 
-    // Reset form after submission
-    formData.value.fileName = '';
-    formData.value.fileSize = '';
-    formData.value.fileDate = '';
-    formData.value.fileLink = '';
+    // Reset form
+    Object.keys(formData.value).forEach(key => (formData.value[key as keyof FormData] = ''));
   } else {
     console.log('Please fill all required fields!');
   }
 };
 
-const cancel = () => {
-  emit('cancel');
-};
+const cancel = () => emit('cancel');
 </script>
+
 
 <template>
   <div class="popup-section" v-if="visible">
@@ -85,29 +73,27 @@ const cancel = () => {
         <div class="popup-header">
           <h5 class="popup-title">Add New File</h5>
           <span type="button" class="btn-cancel" @click="cancel">
-            <UIcon
-                name="fontisto-close"
-            />
+            <UIcon name="fontisto-close" />
           </span>
         </div>
         <div class="popup-body">
           <form @submit.prevent="submitForm">
-            <div class="form-control" v-for="(question , index) in questions" :key="index">
+            <div class="form-control" v-for="(question, index) in questions" :key="index">
               <label class="form-label">{{ question.label }}</label>
               <input
-                  v-if="question.type === 'text' || question.type === 'file' || question.type === 'date'"
+                  v-model="formData[mapLabelToKey(question.label)]"
                   :type="question.type"
                   :placeholder="question.placeholder"
                   :id="question.label"
+                  :required="question.required"
               />
-            </div>
-            <div>
+
             </div>
           </form>
         </div>
         <div class="popup-footer">
-          <button type="submit" class="btn-submit" @click="handleFileUpload">Upload</button>
-          <button type="submit" class="btn-cancel" @click="cancel">Close</button>
+          <button type="submit" class="btn-submit" @click="submitForm">Upload</button>
+          <button type="button" class="btn-cancel" @click="cancel">Close</button>
         </div>
       </div>
     </div>
