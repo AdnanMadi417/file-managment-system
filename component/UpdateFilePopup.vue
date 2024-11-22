@@ -162,7 +162,7 @@ const fileDetails = [
 
 .popup-body .file-detail,
 .popup-body .file-input{
-  font-size: 1.1rem;
+  font-size: 1rem;
   text-align: start;
   color: var(--main-color);
   padding: .5rem;
