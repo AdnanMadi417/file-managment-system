@@ -106,8 +106,8 @@ const cancel = () => {
           </form>
         </div>
         <div class="popup-footer">
-          <button type="submit" class="btn-submit">Add File</button>
-          <button type="submit" class="btn-cancel" @click="cancel">Cancel</button>
+          <button type="submit" class="btn-submit" @click="handleFileUpload">Upload</button>
+          <button type="submit" class="btn-cancel" @click="cancel">Close</button>
         </div>
       </div>
     </div>
