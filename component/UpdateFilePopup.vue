@@ -1,13 +1,48 @@
 <script setup lang="ts">
-import {defineEmits, defineProps, ref, watch} from "vue";
+import {defineEmits, defineProps, reactive} from "vue";
 
 interface File {
-  id: string;
-  fileName: string;
-  fileSize: string;
-  date: string;
-  urlLink: string;
+  id?: string;
+  fileName?: string;
+  fileSize?: string;
+  date?: string;
+  urlLink?: string;
+  button?: boolean;
+
+  [key: string]: any;
 }
+
+const props = defineProps<{
+  visible: Boolean;
+  file: File | null;
+}>();
+
+const emit = defineEmits(["updateFile", "cancel"]);
+
+const updatedFile = reactive<File>({
+  id: props.file?.id || "",
+  fileName: props.file?.fileName || "",
+  fileSize: props.file?.fileSize || "",
+  date: props.file?.date || "",
+  urlLink: props.file?.urlLink || "",
+});
+
+const handleUpdateFile = () => {
+  if (updatedFile && updatedFile.id) {
+    console.log("Updated File Data:", updatedFile);
+    emit("updateFile", updatedFile);
+  } else {
+    console.error("Updated file is missing 'id'");
+  }
+};
+const cancel = () => {
+  console.log("Popup closed");
+  emit("cancel");
+};
+
+const cancelUpdateFile = () => {
+  emit("cancel");
+};
 
 const fileDetails = [
   {label: "File Name", key: "fileName"},
@@ -16,69 +51,37 @@ const fileDetails = [
   {label: "File URL", key: "urlLink"},
 ];
 
-const props = defineProps<{
-  visible: boolean;
-  file: File | null;
-}>();
-
-const emit = defineEmits(["updateFile", "cancel"]);
-
-const updatedFile = ref<File | null>(null);
-
-watch(
-    () => props.file,
-    (newFile) => {
-      updatedFile.value = newFile ? { ...newFile } : null;
-    },
-    { immediate: true }
-);
-
-
-const cancel = () => {
-  console.log("Popup closed");
-  emit("cancel");
-};
-
-const handleUpdateFile = () => {
-  if (updatedFile.value) {
-    emit("updateFile", updatedFile.value);
-  }
-};
-
-const cancelUpdateFile = () => {
-  emit("cancel");
-};
 </script>
 
 <template>
+
   <div class="popup-section" v-if="visible">
     <div class="container" @click.self="cancel">
       <div class="popup-content">
         <div class="popup-header">
-          <h5 class="popup-title">Update File</h5>
+          <h5 class="popup-title">View File</h5>
           <button type="button" class="btn-close" @click="cancel"></button>
         </div>
         <div class="popup-body">
-          <div v-for="(detail, index) in fileDetails" :key="index">
-            <h3>{{ detail.label }}:</h3>
-            <div>
+          <div class="file-detail" v-for="(detail, index) in fileDetails" :key="index">
+            <label class="file-label">
+              {{ detail.label }}:
+            </label>
+            <div class="file-input">
               <input
-                  v-model="updatedFile?.[detail.key]"
+                  v-model="updatedFile[detail.key]"
+                  :placeholder="props.file?.[detail.key] || 'Enter ' + detail.label"
                   :type="detail.key === 'urlLink' ? 'url' : 'text'"
-                  class="form-control"
               />
-              <a
-                  v-if="detail.key === 'urlLink' && updatedFile?.[detail.key]"
-                  :href="updatedFile[detail.key]"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="link-preview"
-              >
-                Open Link
-              </a>
+              <div v-if="detail.key === 'urlLink' && updatedFile[detail.key]">
+                <a :href="updatedFile[detail.key]" target="_blank" rel="noopener noreferrer">
+                  Open Link
+                </a>
+              </div>
             </div>
           </div>
-        </div>        <div class="popup-footer">
+        </div>
+        <div class="popup-footer">
           <button @click="handleUpdateFile" class="update-btn">Update</button>
           <button @click="cancelUpdateFile" class="cancel-btn">Cancel</button>
         </div>
@@ -95,7 +98,7 @@ const cancelUpdateFile = () => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.9);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -112,12 +115,12 @@ const cancelUpdateFile = () => {
 
 .popup-content {
   width: 80%;
-  max-width: 450px;
+  max-width: 550px;
   background: white;
   border-radius: 8px;
   overflow: hidden;
   padding: 0;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.23);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .popup-header {
@@ -141,38 +144,45 @@ const cancelUpdateFile = () => {
   color: var(--main-color);
 }
 
-.btn-close:hover {
-  color: red;
-}
-
 .popup-body {
   padding: 1rem;
   font-size: 1rem;
-  color: #495057;
+  color: var(--main-color) !important;
 }
 
-.popup-body div {
+.popup-body .file-detail{
   display: flex;
   flex-direction: row;
-  align-items: start;
+  align-items: center;
+  text-align: start;
   width: 90%;
-  margin: .2rem auto;
-  background-color: var(--font-color);
+  margin: 0 auto 1rem auto;
+  background-color: var(--font-hovor-color);
 }
 
-div > h3 {
-  flex: 30%;
-  font-size: 1rem;
+.popup-body .file-detail,
+.popup-body .file-input{
+  font-size: 1.1rem;
   text-align: start;
-  padding: 0.5rem;
   color: var(--main-color);
+  padding: .5rem;
+}
+
+.popup-body div .file-detail label{
+  flex: 1 1 25%;
+  padding: .2rem;
+}
+
+.file-detail .file-input{
+  flex: 1 1 70%;
 }
 
 .popup-body div input {
-  width: 90%;
+  width: 100%;
+  outline: none;
   margin: 0 auto;
-  padding: 0.2rem;
-  border: 2px solid var(--font-hovor-color);
+  border: 1px solid var(--font-hovor-color);
+  padding: .2rem;
 }
 
 .popup-footer {
@@ -241,6 +251,6 @@ div > h3 {
   .popup-body {
     padding: 0.8rem;
   }
-
 }
+
 </style>

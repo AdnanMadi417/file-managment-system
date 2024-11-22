@@ -3,6 +3,7 @@ import { onMounted, ref } from "vue";
 import { CListGroup, CListGroupItem } from "@coreui/vue/dist/esm/components/list-group";
 import "bootstrap/dist/css/bootstrap.min.css";
 import ViewFilePopup from "~/component/ViewFilePopup.vue";
+import UpdateFilePopup from "~/component/UpdateFilePopup.vue";
 
 let { $axios } = useNuxtApp();
 const api = $axios();
@@ -17,6 +18,9 @@ interface File {
 }
 
 const files = ref<File[]>([]);
+const selectedFile = ref<File | null>(null);
+const isViewFilePopupVisible = ref(false);
+const isUpdateFilePopupVisible = ref(false);
 
 const fetchFiles = async () => {
   try {
@@ -29,20 +33,25 @@ const fetchFiles = async () => {
     console.error("Error fetching files:", error);
   }
 };
-const selectedFile = ref<File | null>(null);
-const isPopupVisible = ref(false);
 
 const handleAction = (action: string, fileId: string) => {
   if (action === "Delete") {
     deleteFile(fileId);
-  } else if (action === "View") {
+  }
+  else if (action === "View") {
     const file = files.value.find(f => f.id === fileId);
     if (file) {
       selectedFile.value = file;
-      isPopupVisible.value = true; // Show popup on View action
+      isViewFilePopupVisible.value = true;
     }
-  } else if (action === "Update") {
-    console.log(`Update file with ID: ${fileId}`);
+  }
+  else if (action === "Update") {
+    const file = files.value.find(f => f.id === fileId);
+    if (file) {
+      selectedFile.value = { ...file };
+      isUpdateFilePopupVisible.value = true;
+
+    }
   }
 };
 
@@ -56,13 +65,28 @@ const deleteFile = async (fileId: string) => {
   }
 };
 
+const handleUpdateFile = (updatedFile: File) => {
+  if (updatedFile && updatedFile.id) {
+    const index = files.value.findIndex(f => f.id === updatedFile.id);
+    if (index !== -1) {
+      files.value[index] = updatedFile;
+    }
+    console.log("Updated file in dashboard:", updatedFile);
+    isUpdateFilePopupVisible.value = false;
+  } else {
+    console.error("Updated file is invalid or missing 'id'");
+  }
+};
+
 const closePopup = () => {
-  isPopupVisible.value = false; // Close the popup
-  selectedFile.value = null; // Clear the selected file
+  isViewFilePopupVisible.value = false;
+  isUpdateFilePopupVisible.value = false;
+  selectedFile.value = null;
 };
 
 onMounted(fetchFiles);
 </script>
+
 
 <template>
   <div class="dashboard-sec">
@@ -71,7 +95,7 @@ onMounted(fetchFiles);
         <CListGroupItem>
           <div class="header-colum-container">
             <div class="file-name">
-              <span class="icon"><UIcon name="mdi-file" /></span>
+              <span class="icon"><UIcon name="mdi-file"/></span>
               <span class="label"> File Name</span>
             </div>
             <div>File Size</div>
@@ -85,7 +109,7 @@ onMounted(fetchFiles);
               :key="file.id"
           >
             <div class="file-name">
-              <span class="icon"><UIcon name="mdi-file" /></span>
+              <span class="icon"><UIcon name="mdi-file"/></span>
               <span class="label">{{ file.fileName }}</span>
             </div>
             <div>{{ file.fileSize }} GB</div>
@@ -101,15 +125,14 @@ onMounted(fetchFiles);
                 </ul>
               </div>
             </div>
-            <ViewFilePopup :visible="isPopupVisible" :file="selectedFile" @cancel="closePopup" />
           </div>
         </CListGroupItem>
       </CListGroup>
     </div>
   </div>
-
+  <ViewFilePopup :visible="isViewFilePopupVisible" :file="selectedFile" @cancel="closePopup"/>
+  <UpdateFilePopup :visible="isUpdateFilePopupVisible" :file="selectedFile" @updateFile="handleUpdateFile" @cancel="closePopup"/>
 </template>
-
 
 
 <style scoped>
@@ -173,7 +196,7 @@ onMounted(fetchFiles);
 }
 
 .header-colum-container .file-name .icon,
-.colum-container .file-name .icon{
+.colum-container .file-name .icon {
   margin-right: 1rem;
 }
 

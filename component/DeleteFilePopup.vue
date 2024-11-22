@@ -19,7 +19,7 @@
 </template>
 
 <script setup lang="ts">
-import {defineEmits, defineProps} from 'vue';
+import { defineProps, defineEmits } from 'vue';
 
 defineProps({
   visible: {
@@ -31,12 +31,13 @@ defineProps({
 const emit = defineEmits(['confirm', 'cancel']);
 
 const confirm = () => {
-  emit('confirm');
+  emit("confirm");
 };
 
 const cancel = () => {
-  emit('cancel');
+  emit("cancel");
 };
+
 </script>
 
 <style scoped>
@@ -121,18 +122,59 @@ const cancel = () => {
 
 .popup-footer .btn-cancel,
 .popup-footer .btn-confirm {
-  background-color: var(--button-color);
+  background-color: var(--main-color);
   color: var(--font-color);
 }
 
-.popup-footer .btn-confirm:hover {
+.popup-footer .btn-cancel:hover {
   background-color: var(--button-color);
   transition: .3s ease-in-out;
 }
 
 .popup-footer .btn-confirm:hover {
-  background-color: rgba(255, 0, 0, 0.9);
+  background-color: red;
   transition: .3s ease-in-out;
+}
+
+@media (max-width: 1200px) {
+  .popup-footer {
+    display: flex;
+    justify-content: space-between;
+  }
+}
+
+
+@media (max-width: 768px) {
+  .popup-content {
+    width: 90%;
+  }
+
+  .popup-header {
+    display: flex;
+  }
+
+  .popup-title {
+    font-size: 1.2rem;
+  }
+
+  .popup-body div {
+    flex-direction: column;
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .popup-title {
+    font-size: 1rem;
+  }
+
+  .btn-close {
+    font-size: 1.2rem;
+  }
+
+  .popup-body {
+    padding: 0.8rem;
+  }
 }
 
 </style>
