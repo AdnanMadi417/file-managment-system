@@ -1,0 +1,69 @@
+File Management System
+
+Actions
+    1.View File
+    2. Update File
+    3. Delete File
+    4. Add File
+
+Components
+    1. ViewFilePopup
+    2. UpdateFilePopup
+    3. DeleteFilePopup
+    4. AddFilePopup
+
+
+
+<template>
+  <div class="file-upload">
+    <div class="container">
+      <div class="form-control">
+        <h2 class="title">Upload File</h2>
+        <form @submit.prevent="uploadFile">
+          <label for="file-input">Choose a file:</label>
+          <input type="file" id="file-input" ref="fileInput"/>
+          <button type="submit">Upload</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import {ref} from 'vue';
+
+const fileInput = ref(null);
+
+const uploadFile = () => {
+  const file = fileInput.value?.files[0];
+  if (!file) {
+    alert('Please select a file to upload');
+    return;
+  }
+  console.log(file);
+};
+</script>
+
+<style>
+.file-upload {
+  background-color: #921A40;
+}
+
+.container {
+  top: 50%;
+  left: 50%;
+  position: absolute;
+  transform: translate(-50%, -50%);
+  margin: 0 auto;
+  padding: 3rem;
+  border-radius: 0.5rem;
+  border: 2px solid #921A40;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.form-control .title {
+  font-size: 1.2rem;
+}
+</style>
