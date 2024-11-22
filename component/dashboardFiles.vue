@@ -1,12 +1,13 @@
 <script setup lang="ts">
-import {onMounted, ref} from "vue";
-import {CListGroup, CListGroupItem} from "@coreui/vue/dist/esm/components/list-group";
+import { onMounted, ref } from "vue";
+import { CListGroup, CListGroupItem } from "@coreui/vue/dist/esm/components/list-group";
 import "bootstrap/dist/css/bootstrap.min.css";
 import ViewFilePopup from "~/component/ViewFilePopup.vue";
 import UpdateFilePopup from "~/component/UpdateFilePopup.vue";
 import AddFilePopup from "~/component/AddFilePopup.vue";
+import Loader from "~/component/Loader.vue";
+let { $axios } = useNuxtApp();
 
-let {$axios} = useNuxtApp();
 const api = $axios();
 
 interface File {
@@ -23,8 +24,10 @@ const selectedFile = ref<File | null>(null);
 const isViewFilePopupVisible = ref(false);
 const isUpdateFilePopupVisible = ref(false);
 const isAddFilePopupVisible = ref(false);
+const isLoading = ref(false);  // Add loading state
 
 const fetchFiles = async () => {
+  isLoading.value = true;
   try {
     const response = await api.get("https://671f40e7e7a5792f052d8a2f.mockapi.io/Files");
     files.value = response.data.map((file: any) => ({
@@ -33,6 +36,8 @@ const fetchFiles = async () => {
     }));
   } catch (error) {
     console.error("Error fetching files:", error);
+  } finally {
+    isLoading.value = false;
   }
 };
 
@@ -60,9 +65,8 @@ const handleAction = (action: string, fileId: string) => {
   } else if (action === "Update") {
     const file = files.value.find(f => f.id === fileId);
     if (file) {
-      selectedFile.value = {...file};
+      selectedFile.value = { ...file };
       isUpdateFilePopupVisible.value = true;
-
     }
   }
 };
@@ -100,7 +104,6 @@ const closePopup = () => {
 onMounted(fetchFiles);
 </script>
 
-
 <template>
   <div class="dashboard-sec">
     <div class="container">
@@ -108,22 +111,27 @@ onMounted(fetchFiles);
         <CListGroupItem>
           <div class="header-colum-container">
             <div class="file-name">
-              <span class="icon"><UIcon name="mdi-file"/></span>
-              <span class="label"> File Name</span>
+              <span class="icon"><UIcon name="mdi-file" /></span>
+              <span class="label">File Name</span>
             </div>
             <div>File Size</div>
             <div>Link</div>
             <div>Date</div>
             <div>
-              <button @click="showAddFilePopup">Add File</button></div>
+              <button @click="showAddFilePopup">Add File</button>
+            </div>
           </div>
+
+          <Loader :isLoading="isLoading" />
+
+
           <div
               class="colum-container"
               v-for="file in files"
               :key="file.id"
           >
             <div class="file-name">
-              <span class="icon"><UIcon name="mdi-file"/></span>
+              <span class="icon"><UIcon name="mdi-file" /></span>
               <span class="label">{{ file.fileName }}</span>
             </div>
             <div>{{ file.fileSize }} GB</div>
@@ -144,10 +152,9 @@ onMounted(fetchFiles);
       </CListGroup>
     </div>
   </div>
-  <AddFilePopup :visible="isAddFilePopupVisible" @addFile="handleAddFile" @cancel="closePopup"/>
-  <ViewFilePopup :visible="isViewFilePopupVisible" :file="selectedFile" @cancel="closePopup"/>
-  <UpdateFilePopup :visible="isUpdateFilePopupVisible" :file="selectedFile" @updateFile="handleUpdateFile"
-                   @cancel="closePopup"/>
+  <AddFilePopup :visible="isAddFilePopupVisible" @addFile="handleAddFile" @cancel="closePopup" />
+  <ViewFilePopup :visible="isViewFilePopupVisible" :file="selectedFile" @cancel="closePopup" />
+  <UpdateFilePopup :visible="isUpdateFilePopupVisible" :file="selectedFile" @updateFile="handleUpdateFile" @cancel="closePopup" />
 </template>
 
 

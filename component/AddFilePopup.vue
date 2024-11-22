@@ -28,7 +28,6 @@ const formData = ref<FormData>({
   fileLink: '',
 });
 
-// Map labels to FormData keys
 const mapLabelToKey = (label: string): keyof FormData => {
   switch (label) {
     case "File Name":
@@ -47,6 +46,7 @@ const mapLabelToKey = (label: string): keyof FormData => {
 const submitForm = () => {
   const { fileName, fileSize, fileDate, fileLink } = formData.value;
 
+
   if (fileName && fileSize && fileDate) {
     emit('addFile', {
       fileName,
@@ -54,8 +54,6 @@ const submitForm = () => {
       date: fileDate,
       urlLink: fileLink || '',
     });
-
-    // Reset form
     Object.keys(formData.value).forEach(key => (formData.value[key as keyof FormData] = ''));
   } else {
     console.log('Please fill all required fields!');
@@ -63,6 +61,7 @@ const submitForm = () => {
 };
 
 const cancel = () => emit('cancel');
+
 </script>
 
 

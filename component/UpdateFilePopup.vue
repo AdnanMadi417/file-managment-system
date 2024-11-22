@@ -161,6 +161,11 @@ const fileDetails = [
   background-color: var(--font-hovor-color);
 }
 
+.popup-body .file-detail label{
+  min-width: 200px;
+  background-color: #39701d;
+}
+
 .popup-body .file-detail,
 .popup-body .file-input{
   font-size: 1rem;
