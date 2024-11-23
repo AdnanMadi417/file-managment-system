@@ -144,13 +144,6 @@ const cancel = () => emit('cancel');
   cursor: pointer;
 }
 
-
-.btn-cancel:hover {
-  cursor: pointer;
-  color: red;
-  transition: .4s ease-in-out;
-}
-
 .popup-body {
   padding: 1rem;
   font-size: 1rem;
