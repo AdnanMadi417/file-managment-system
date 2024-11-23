@@ -226,7 +226,13 @@ defineExpose({ addToast });
   cursor: pointer;
   outline: none;
   transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
-  background-color: red;
+  background-color: transparent;
+}
+
+.header-colum-container div > button:hover{
+  background-color: var(--main-color);
+  color: var(--font-color);
+  transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
 }
 
 .header-colum-container .file-name,
