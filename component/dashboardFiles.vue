@@ -112,6 +112,7 @@ const handleUpdateFile = (updatedFile: File) => {
 };
 
 const closePopup = () => {
+  addToast("Popup is Closed!", "success");
   isViewFilePopupVisible.value = false;
   isUpdateFilePopupVisible.value = false;
   isAddFilePopupVisible.value = false;
