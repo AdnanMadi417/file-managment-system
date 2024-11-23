@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import DashboardFiles from "~/component/dashboardFiles.vue";
+import DashboardFiles from "~/component/DashboardFiles.vue";
 
 </script>
 

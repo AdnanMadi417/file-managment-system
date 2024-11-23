@@ -218,6 +218,17 @@ defineExpose({ addToast });
   margin: 0 1rem;
 }
 
+.header-colum-container div > button{
+  padding: 0.5rem 1rem;
+  color: var(--font-hovor-color);
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  outline: none;
+  transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+  background-color: red;
+}
+
 .header-colum-container .file-name,
 .colum-container .file-name {
   flex: 2 1 20%;

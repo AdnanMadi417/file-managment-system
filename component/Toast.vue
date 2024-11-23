@@ -14,7 +14,6 @@
 <script setup>
 import { ref, onMounted } from "vue";
 
-// Props definition
 const props = defineProps({
   message: {
     type: String,
