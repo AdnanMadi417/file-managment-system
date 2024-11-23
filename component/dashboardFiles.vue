@@ -7,8 +7,16 @@ import UpdateFilePopup from "~/component/UpdateFilePopup.vue";
 import AddFilePopup from "~/component/AddFilePopup.vue";
 import Loader from "~/component/Loader.vue";
 let { $axios } = useNuxtApp();
+import Toast from './Toast.vue';
+
 
 const api = $axios();
+
+interface Toast {
+  message: string;
+  type: string;
+  duration: number;
+}
 
 interface File {
   id: string;
@@ -40,9 +48,14 @@ const fetchFiles = async () => {
     isLoading.value = false;
   }
 };
+const toasts = ref<Toast[]>([]);
 
 const showAddFilePopup = () => {
   isAddFilePopupVisible.value = true;
+};
+
+const addToast = (message: string, type = 'success', duration = 2000) => {
+  toasts.value.push({ message, type, duration });
 };
 
 const handleAddFile = (newFile: File) => {
@@ -61,6 +74,7 @@ const handleAction = (action: string, fileId: string) => {
     if (file) {
       selectedFile.value = file;
       isViewFilePopupVisible.value = true;
+
     }
   } else if (action === "Update") {
     const file = files.value.find(f => f.id === fileId);
@@ -68,15 +82,18 @@ const handleAction = (action: string, fileId: string) => {
       selectedFile.value = { ...file };
       isUpdateFilePopupVisible.value = true;
     }
-  }
+    }
 };
 
 const deleteFile = async (fileId: string) => {
   try {
     await api.delete(`https://671f40e7e7a5792f052d8a2f.mockapi.io/Files/${fileId}`);
     files.value = files.value.filter(file => file.id !== fileId);
+    addToast(`File with ID ${fileId} deleted successfully.`, "success");
+    console.log(`${fileId}`)
     console.log(`File with ID ${fileId} deleted successfully.`);
   } catch (error) {
+    addToast("Failed to delete file. Please try again.", "error");
     console.error("Error deleting file:", error);
   }
 };
@@ -102,6 +119,9 @@ const closePopup = () => {
 };
 
 onMounted(fetchFiles);
+
+defineExpose({ addToast });
+
 </script>
 
 <template>
@@ -151,6 +171,15 @@ onMounted(fetchFiles);
         </CListGroupItem>
       </CListGroup>
     </div>
+    <Toast
+        v-for="(toast, index) in toasts"
+        :key="index"
+        :message="toast.message"
+        :type="toast.type"
+        :duration="toast.duration"
+        @remove="toasts.splice(index, 1)"
+    />
+
   </div>
   <AddFilePopup :visible="isAddFilePopupVisible" @addFile="handleAddFile" @cancel="closePopup" />
   <ViewFilePopup :visible="isViewFilePopupVisible" :file="selectedFile" @cancel="closePopup" />
