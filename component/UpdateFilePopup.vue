@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {defineEmits, defineProps, reactive} from "vue";
+import {defineEmits, defineProps, reactive, ref, watch} from "vue";
 
 interface File {
   id?: string;
@@ -8,7 +8,6 @@ interface File {
   date?: string;
   urlLink?: string;
   button?: boolean;
-
   [key: string]: any;
 }
 
@@ -27,30 +26,49 @@ const updatedFile = reactive<File>({
   urlLink: props.file?.urlLink || "",
 });
 
+watch(() => props.file, (newFile) => {
+  if (newFile) {
+    updatedFile.id = newFile.id || "";
+    updatedFile.fileName = newFile.fileName || "";
+    updatedFile.fileSize = newFile.fileSize || "";
+    updatedFile.date = newFile.date || "";
+    updatedFile.urlLink = newFile.urlLink || "";
+  }
+}, { immediate: true });
+
+interface Toast {
+  message: string;
+  type: string;
+  duration: number;
+}
+const toasts = ref<Toast[]>([]);
+const addToast = (message: string, type = 'success', duration = 2000) => {
+  toasts.value.push({ message, type, duration });
+};
+
+
 const handleUpdateFile = () => {
-  if (updatedFile && updatedFile.id) {
-    console.log("Updated File Data:", updatedFile);
+  if (updatedFile.id && updatedFile.id.trim()) {
     emit("updateFile", updatedFile);
+    addToast(`File ${updatedFile.fileName} updated successfully.`, "success");
   } else {
-    console.error("Updated file is missing 'id'");
+    emit("cancel");
   }
 };
+
 const cancel = () => {
-  console.log("Popup closed");
   emit("cancel");
 };
 
 const fileDetails = [
-  {label: "File Name", key: "fileName"},
-  {label: "File Size", key: "fileSize"},
-  {label: "Date", key: "date"},
-  {label: "File URL", key: "urlLink"},
+  { label: "File Name", key: "fileName" },
+  { label: "File Size", key: "fileSize" },
+  { label: "Date", key: "date" },
+  { label: "File URL", key: "urlLink" },
 ];
-
 </script>
 
 <template>
-
   <div class="popup-section" v-if="visible">
     <div class="container" @click.self="cancel">
       <div class="popup-content">
@@ -61,9 +79,7 @@ const fileDetails = [
         <hr class="divider">
         <div class="popup-body">
           <div class="file-detail" v-for="(detail, index) in fileDetails" :key="index">
-            <label class="file-label">
-              {{ detail.label }}:
-            </label>
+            <label class="file-label">{{ detail.label }}:</label>
             <div class="file-input">
               <input
                   v-model="updatedFile[detail.key]"
@@ -71,9 +87,7 @@ const fileDetails = [
                   :type="detail.key === 'urlLink' ? 'url' : 'text'"
               />
               <div v-if="detail.key === 'urlLink' && updatedFile[detail.key]">
-                <a :href="updatedFile[detail.key]" target="_blank" rel="noopener noreferrer">
-                  Open Link
-                </a>
+                <a :href="updatedFile[detail.key]" target="_blank" rel="noopener noreferrer">Open Link</a>
               </div>
             </div>
           </div>
@@ -86,6 +100,8 @@ const fileDetails = [
     </div>
   </div>
 </template>
+
+
 
 
 <style scoped>
@@ -158,12 +174,11 @@ const fileDetails = [
   text-align: start;
   width: 90%;
   margin: 0 auto .5rem auto;
-  background-color: var(--font-hovor-color);
+  background-color: var(--font-color);
 }
 
 .popup-body .file-detail label{
-  min-width: 200px;
-  background-color: #39701d;
+  min-width: 100px;
 }
 
 .popup-body .file-detail,

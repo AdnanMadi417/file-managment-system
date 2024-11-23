@@ -9,7 +9,6 @@ import Loader from "~/component/Loader.vue";
 let { $axios } = useNuxtApp();
 import Toast from './Toast.vue';
 
-
 const api = $axios();
 
 interface Toast {
@@ -67,6 +66,12 @@ const handleAddFile = (newFile: File) => {
 };
 
 const handleAction = (action: string, fileId: string) => {
+  const file = files.value.find(f => f.id === fileId);
+
+  if (!file) {
+    console.error(`File with ID ${fileId} not found.`);
+    return;
+  }
   if (action === "Delete") {
     deleteFile(fileId);
   } else if (action === "View") {
@@ -77,12 +82,9 @@ const handleAction = (action: string, fileId: string) => {
 
     }
   } else if (action === "Update") {
-    const file = files.value.find(f => f.id === fileId);
-    if (file) {
-      selectedFile.value = { ...file };
+    selectedFile.value = { ...file };
       isUpdateFilePopupVisible.value = true;
-    }
-    }
+  }
 };
 
 const deleteFile = async (fileId: string) => {
@@ -98,16 +100,12 @@ const deleteFile = async (fileId: string) => {
   }
 };
 
-const handleUpdateFile = (updatedFile: File) => {
-  if (updatedFile && updatedFile.id) {
-    const index = files.value.findIndex(f => f.id === updatedFile.id);
-    if (index !== -1) {
-      files.value[index] = updatedFile;
-    }
-    console.log("Updated file in dashboard:", updatedFile);
-    isUpdateFilePopupVisible.value = false;
-  } else {
-    console.error("Updated file is invalid or missing 'id'");
+const updateFile = (updatedFile: File) => {
+  const index = files.value.findIndex(file => file.id === updatedFile.id);
+  if (index !== -1) {
+    files.value[index] = { ...updatedFile };
+    closePopup();
+    addToast(`File ${updatedFile.fileName} updated successfully.`, "success");
   }
 };
 
@@ -116,7 +114,6 @@ const closePopup = () => {
   isViewFilePopupVisible.value = false;
   isUpdateFilePopupVisible.value = false;
   isAddFilePopupVisible.value = false;
-  selectedFile.value = null;
 };
 
 onMounted(fetchFiles);
@@ -184,7 +181,8 @@ defineExpose({ addToast });
   </div>
   <AddFilePopup :visible="isAddFilePopupVisible" @addFile="handleAddFile" @cancel="closePopup" />
   <ViewFilePopup :visible="isViewFilePopupVisible" :file="selectedFile" @cancel="closePopup" />
-  <UpdateFilePopup :visible="isUpdateFilePopupVisible" :file="selectedFile" @updateFile="handleUpdateFile" @cancel="closePopup" />
+  <UpdateFilePopup :visible="isUpdateFilePopupVisible" :file="selectedFile" @updateFile="updateFile" @cancel="closePopup"/>
+
 </template>
 
 
