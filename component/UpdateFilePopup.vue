@@ -186,6 +186,7 @@ const fileDetails = [
   font-size: 1rem;
   text-align: start;
   color: var(--main-color);
+  background-color:transparent;
   padding: .2rem;
 }
 
